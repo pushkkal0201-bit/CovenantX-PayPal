@@ -1,0 +1,17 @@
+{
+  "title": "Atlas milestone 02",
+  "source_text": "Fee 5000 USD. Coverage 85 percent minimum, with a 500 USD deduction when unmet.",
+  "amount": "5000.00",
+  "currency": "USD",
+  "commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "clauses": [
+    {
+      "id": "COVERAGE",
+      "metric": "coverage",
+      "operator": "gte",
+      "threshold": "85",
+      "deduction": "500.00",
+      "text": "Automated coverage must reach 85 percent."
+    }
+  ]
+}

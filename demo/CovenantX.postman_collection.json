@@ -1,0 +1,247 @@
+{
+  "info": {
+    "name": "CovenantX development API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Manual collection, not an executed test receipt. Use current versions; configure token locally."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "milestone_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/health"
+      }
+    },
+    {
+      "name": "List milestones",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones"
+      }
+    },
+    {
+      "name": "Create draft",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Atlas milestone 02\",\n  \"source_text\": \"Fee 5000 USD. Coverage 85 percent minimum, with a 500 USD deduction when unmet.\",\n  \"amount\": \"5000.00\",\n  \"currency\": \"USD\",\n  \"commit_sha\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n  \"clauses\": [\n    {\n      \"id\": \"COVERAGE\",\n      \"metric\": \"coverage\",\n      \"operator\": \"gte\",\n      \"threshold\": \"85\",\n      \"deduction\": \"500.00\",\n      \"text\": \"Automated coverage must reach 85 percent.\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Approve contract",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/approve-contract",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"version\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Fixture verification (attest first)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/verify",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"version\": 4,\n  \"mode\": \"fixture\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Hypothetical coverage",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/simulate",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"coverage\": \"90\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Passport",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/passport"
+      }
+    },
+    {
+      "name": "Replay decision",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/replay"
+      }
+    },
+    {
+      "name": "Recover by provider read",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/recover",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"version\": 1,\n  \"order_id\": \"REPLACE_WITH_SANDBOX_ORDER\",\n  \"note\": \"Describe source inspection and interruption here\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Edit active draft",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/milestones/{{milestone_id}}/contract",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"version\": 1,\n  \"contract\": {\n    \"title\": \"Atlas milestone 02\",\n    \"source_text\": \"Fee 5000 USD. Coverage 85 percent minimum, with a 500 USD deduction when unmet.\",\n    \"amount\": \"5000.00\",\n    \"currency\": \"USD\",\n    \"commit_sha\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n    \"clauses\": [\n      {\n        \"id\": \"COVERAGE\",\n        \"metric\": \"coverage\",\n        \"operator\": \"gte\",\n        \"threshold\": \"85\",\n        \"deduction\": \"500.00\",\n        \"text\": \"Automated coverage must reach 85 percent.\"\n      }\n    ]\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

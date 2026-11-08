@@ -1,0 +1,21 @@
+{
+  "note": "DEMONSTRATION FIXTURE",
+  "metrics": {
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 100,
+        "max": 220,
+        "p(95)": 180
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1000
+      }
+    }
+  }
+}

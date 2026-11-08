@@ -1,0 +1,13 @@
+{
+  "transport": "real localhost HTTP",
+  "health_status": 200,
+  "review_mode": "SIMULATED",
+  "current": "4500.00",
+  "hypothetical": "5000.00",
+  "fixture_authorization_status": 409,
+  "imported_reports": 4,
+  "policy_replay": "PASS",
+  "offline_cli_replay": "PASS",
+  "external_services_called": false,
+  "result": "PASS"
+}
