@@ -43,7 +43,7 @@ Report uploads now derive measurements server-side, draft contracts have a form 
 | Gemini | Adapter implemented; account/model execution blocked by absent credentials |
 | PayPal | Adapter and financial workflow tested against doubles; real sandbox workflow unverified |
 | PostgreSQL / containers | Configuration supplied; not executed here (Docker unavailable) |
-| Hosting / public repository | Not deployed or published |
+| Hosted application | Not deployed |
 
 Read [submission readiness](docs/submission/SUBMISSION_READINESS.md) before using this in a competition demo.
 
