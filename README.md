@@ -104,6 +104,15 @@ npm run dev
 
 Open `http://localhost:3000`. API health is `http://localhost:8000/api/health`; the interactive API reference is `http://localhost:8000/docs`.
 
+### Check configuration before a demo
+
+```bash
+python scripts/preflight.py
+python scripts/preflight.py --mode sandbox --webhook --json
+```
+
+The first command checks the fixture setup. The second also requires Gemini, PayPal and webhook settings. Reports contain check names and remedies, never configuration values. Exit status is 0 when configuration checks pass and 1 when a required check fails. Existing environment variables take precedence over `.env`, matching the API launcher. These checks make no network calls and do not prove that credentials or external integrations work.
+
 ### Configure real external integrations
 
 Edit `.env` with your authorized **sandbox merchant** client ID and secret, Gemini API key and a model available to your account. `GEMINI_MODEL` is deliberately not guessed: consult Google's current model catalog and your account access. Restart the API after editing.
