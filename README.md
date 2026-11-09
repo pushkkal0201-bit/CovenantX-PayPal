@@ -29,6 +29,10 @@ Report uploads now derive measurements server-side, draft contracts have a form 
 - Client/vendor dispute handling and fresh client settlement approval after a resolution.
 - Sandbox-only PayPal OAuth, order creation, capture, GET reconciliation and provider-verified webhook adapter. Durable request IDs, revision claims and uncertainty locks protect the same payment intent. GET-only recovery validates candidate orders after an interruption.
 
+## Review inspection
+
+The Verification workspace exposes stored outputs from both sequential Gemini review stages. Filter by clause or differing verdicts, expand source quotations, and inspect input digests and provider response IDs. The final assessment and server policy remain authoritative. Fixture runs explicitly show that no provider stage receipts exist.
+
 ## Verification status
 
 | Area | Result |

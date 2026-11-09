@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ReviewInspector, { type ReviewRecord } from "../components/ReviewInspector";
 import ContractEditor from "../components/ContractEditor";
 import ArtifactImporter from "../components/ArtifactImporter";
 import {
@@ -67,7 +68,7 @@ type RecordData = {
     holds: string[];
     rows: Row[];
   };
-  verification: null | { receipt: { mode: string; model: string } };
+  verification: ReviewRecord | null;
   payment: null | {
     order_id?: string;
     capture_id?: string;
@@ -212,6 +213,11 @@ function App() {
   });
   const d = list.data?.find((x) => x.id === selected) || list.data?.[0];
   const client = me.data?.role === "client";
+  useEffect(() => {
+    setScenario(null);
+    setGraph(null);
+    setReplay(null);
+  }, [d?.id, d?.version, token]);
   async function run(action: () => Promise<unknown>, success = "Saved.") {
     setBusy(true);
     setMessage("");
@@ -710,6 +716,7 @@ function App() {
                     </p>
                   ))}
                   <EvidenceTable rows={d?.proposal?.rows || []} />
+                  <ReviewInspector key={`${d?.id}-${d?.version}`} review={d?.verification || null} source={d?.evidence && typeof d.evidence === "object" && "content" in d.evidence ? String(d.evidence.content) : ""} />
                 </section>
               )}
               {tab === "Settlement studio" && (
