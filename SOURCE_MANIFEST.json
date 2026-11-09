@@ -42,6 +42,7 @@
   "demo/reports/k6-summary.json": "07724b03157baf82a05b92a43b067335dc393a53a7cf576e62a28dd6dbe308fe",
   "demo/reports/security.sarif": "7d4fad4ffa1290137123ae2b3992b7f7fdf397ab159fc14ce60480b353bcdd4f",
   "docs/ARCHITECTURE.md": "386fddc65fec0cf8f7c0e9397fd568e2f4727861376c035691ee22a20d2fd243",
+  "docs/LOCAL_RUNBOOK.md": "0b8a2effde2046bf0434f137e55ef77f878fe5ee67a1b5f39f2f6136bf899414",
   "docs/TECH_DECISIONS.md": "a38103a0069661024be24720f726618d7e45f47aa20b1ebe8e64092ee383011f",
   "docs/engineering/ASTRA_TOOL_REGISTER.md": "9a879bcab716a762e5c05555dfa35cd182eb6072612f444456585fe1b5033ca2",
   "docs/engineering/ENGINEERING_AUDIT.md": "8774515dc4e4f8a563cd0bf42dbb62d8181bb294fdd7d5772fac53e5e8741985",
