@@ -4,7 +4,7 @@
   ".github/workflows/checks.yml": "d8d56f79e719f987bebc026cf7cc9da1f233e8d1c2d5c918becebbabe87e8f69",
   ".gitignore": "ecba7cca785ff35ce27711e69ec52cc0c39c2387f773b87c93c5bc82fd8acca6",
   "LICENSE": "a088b06ca56080704b98877acbe51b57564a7d13150598f80084fc31df6ea2e4",
-  "README.md": "9163906dcd2b923e0b0e955fe84c7e53a704ed3a3651aa1b97ef0f6ec9ac6469",
+  "README.md": "5c04600154da6daea74d57a1db21fc37e32ee5826298d3e746e49de6947a0bbb",
   "alembic.ini": "d092948434479626cd9f6dae08c05b43103941eb7eaa71e20cf26568bb20e10a",
   "apps/api/Dockerfile": "8a2b3e5ec1831b080b7e614888930db031637d8ad58e5cb3414371e7045b037f",
   "apps/api/covenantx/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
