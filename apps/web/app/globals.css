@@ -719,3 +719,8 @@ blockquote {
 .review-finding { padding: 18px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
 .review-finding .panel-title { margin-bottom: 8px; }
 .review-finding blockquote { white-space: pre-wrap; }
+
+.audit-timeline { list-style: none; margin: 22px 0; padding: 0 0 0 22px; border-left: 2px solid var(--line); }
+.audit-timeline li { position: relative; padding: 0 0 22px; }
+.audit-timeline li::before { content: ""; position: absolute; left: -28px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+.audit-timeline .panel-title { gap: 10px; flex-wrap: wrap; }

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import ReviewInspector, { type ReviewRecord } from "../components/ReviewInspector";
+import AuditTimeline from "../components/AuditTimeline";
 import ContractEditor from "../components/ContractEditor";
 import ArtifactImporter from "../components/ArtifactImporter";
 import {
@@ -86,6 +87,7 @@ const tabs = [
   "Disputes",
   "PayPal operations",
   "Evidence passport",
+  "Activity log",
 ];
 const sha = "a".repeat(40);
 const initialContract = {
@@ -297,6 +299,7 @@ function App() {
                   <LockKeyhole key="f" />,
                   <ArrowUpRight key="g" />,
                   <FileCheck2 key="h" />,
+                  <Receipt key="i" />,
                 ][i]
               }
               {x}
@@ -989,6 +992,7 @@ function App() {
                   </details>
                 </section>
               )}
+              {tab === "Activity log" && (d ? <AuditTimeline key={d.id} id={d.id} version={d.version} access={token} api={api} /> : <section className="panel"><p>Create a milestone to start its activity history.</p></section>)}
               {tab === "Evidence passport" && (
                 <section className="panel">
                   <FileCheck2 className="emerald" size={32} />

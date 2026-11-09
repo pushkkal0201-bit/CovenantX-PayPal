@@ -16,7 +16,7 @@ Report uploads now derive measurements server-side, draft contracts have a form 
 
 ## What runs today
 
-- Next.js 15 / TypeScript interface with eight workspaces, role-specific actions, explicit errors and 15-second polling. The overview includes a live, clickable journey and a transaction impact preview that traces approved rule deductions to the proposed PayPal amount.
+- Next.js 15 / TypeScript interface with nine workspaces, role-specific actions, explicit errors and 15-second polling. The overview includes a live, clickable journey and a transaction impact preview that traces approved rule deductions to the proposed PayPal amount.
 - FastAPI API, Pydantic validation and SQLAlchemy persistence. Local SQLite was tested; PostgreSQL configuration and Alembic migration are supplied.
 - Immutable contract rules after approval, revision-bound writes and append-only application audit events.
 - Contract forms and revision-bound draft editing; advanced JSON remains available. Approved contracts cannot be edited.
@@ -28,6 +28,10 @@ Report uploads now derive measurements server-side, draft contracts have a form 
 - A clause/evidence/finding relationship explorer and JSON Evidence Passport with an offline integrity checker, historical policy replay and readable report export.
 - Client/vendor dispute handling and fresh client settlement approval after a resolution.
 - Sandbox-only PayPal OAuth, order creation, capture, GET reconciliation and provider-verified webhook adapter. Durable request IDs, revision claims and uncertainty locks protect the same payment intent. GET-only recovery validates candidate orders after an interruption.
+
+## Activity history
+
+The Activity log provides role and event filters, state transitions, changed-field names and a JSON export for operational review. Older audit events remain readable without transition summaries. Actors identify deployment roles, not individual people; the log is not an immutable ledger.
 
 ## Review inspection
 

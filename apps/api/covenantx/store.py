@@ -31,8 +31,14 @@ class Store:
         with Session(self.engine) as s: return [json.loads(r.data) for r in s.scalars(select(Record).order_by(Record.id))]
     def save(self,d,expected,actor,event):
         d=dict(d); d['version']=expected+1
-        audit={'at':now(),'actor':actor,'event':event,'version':d['version'],'record_hash':digest(d)}
         with Session(self.engine) as s,s.begin():
+            previous=s.get(Record,d['id']) if expected else None
+            before=json.loads(previous.data) if previous else {}
+            audit={'at':now(),'actor':actor,'event':event,'version':d['version'],
+                   'record_hash':digest(d),'state_before':before.get('state'),
+                   'state_after':d.get('state'),
+                   'changed_fields':sorted(k for k in set(before)|set(d)
+                                           if k!='version' and before.get(k)!=d.get(k))}
             if expected==0:
                 s.add(Record(id=d['id'],version=1,data=canonical(d)))
             else:
