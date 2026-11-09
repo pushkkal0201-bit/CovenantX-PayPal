@@ -1,5 +1,9 @@
 # CovenantX
 
+**Software delivery review · Contract deductions · PayPal Sandbox checkout**
+
+[Problem](#the-problem) · [Example](#a-worked-example) · [Workflow](#how-a-milestone-moves-through-the-app) · [Architecture](#architecture) · [Workspace](#workspace) · [Setup](#run-covenantx-locally) · [Sample](#run-the-sample)
+
 CovenantX connects software acceptance criteria to a milestone payment. A client agrees on delivery rules, a vendor submits the reports, and Gemini reviews the evidence. The server applies the agreed deductions and prepares an amount for the client to approve through PayPal Sandbox.
 
 ## The problem
@@ -15,6 +19,22 @@ It's intended for software delivery milestones with measurable acceptance criter
 Suppose a milestone is worth $5,000. Its contract requires at least 85% statement coverage, with a $500 deduction for falling below that threshold.
 
 The vendor submits a report showing 78%. The client checks the report's source and commit, then requests a review. If the remaining clauses pass and the evidence checks clear, CovenantX proposes $4,500. The client can open the coverage finding, inspect the supporting text and approve the amount before creating a PayPal Sandbox order.
+
+<details>
+<summary><strong>Open the sample contract and deduction breakdown</strong></summary>
+
+| Clause | Agreed requirement | Submitted measurement | Result | Deduction |
+| --- | --- | --- | --- | --- |
+| Coverage | At least 85% statement coverage | 78% | Fail | $500 |
+| Latency | P95 at most 200 ms | 180 ms | Pass | $0 |
+| Security | Zero critical findings | 0 | Pass | $0 |
+| Documentation | Delivery documentation present | Present | Pass | $0 |
+
+**Proposed amount = $5,000 − $500 = $4,500**
+
+Changing the hypothetical coverage to 90% in Settlement studio produces a $5,000 comparison. The saved proposal keeps its original evidence and amount. A different payable decision requires evidence review and client approval.
+
+</details>
 
 ## How a milestone moves through the app
 
@@ -51,6 +71,93 @@ For each failed clause, the server subtracts the deduction written into the appr
 
 CovenantX uses that amount to create a PayPal Sandbox order. After the buyer approves it in PayPal, the client requests capture and reconciliation. The API checks the returned order, currency, amount and snapshot reference before recording completion. Stored request IDs and payment states control retries when a response is interrupted.
 
+## Architecture
+
+The web app talks to a FastAPI service through the Next.js API proxy. FastAPI owns milestone state, evidence parsing, review checks and payment operations. Provider credentials stay in the backend environment.
+
+```mermaid
+flowchart TD
+    Browser["Client or vendor workspace"] --> Proxy["Next.js API proxy"]
+    Proxy --> API["FastAPI role and revision checks"]
+    API --> Store["SQLAlchemy milestone and audit store"]
+    API --> Parse["Report parsers"]
+    Parse --> Review["Gemini review"]
+    Review --> Policy["Citation checks and settlement policy"]
+    Policy --> Store
+    API --> Payments["PayPal adapter"]
+    Payments --> Sandbox["PayPal Sandbox"]
+    Sandbox --> Verify["Order and capture validation"]
+    Verify --> Store
+```
+
+<details>
+<summary><strong>How review results become a payable amount</strong></summary>
+
+Gemini receives the approved contract and submitted evidence as structured input. Each stage returns clause IDs, verdicts, exact quotations and explanations. The saved stage records include the input digest and provider response ID when available.
+
+The second stage sees the first stage's findings. If their verdicts disagree, the review records a concern. A concern from the first stage is preserved even if the second stage clears its own concern.
+
+The server then checks the assessment against the contract and evidence.
+
+| Check | What it establishes |
+| --- | --- |
+| Clause coverage | Every approved clause appears exactly once in the assessment. |
+| Exact quotation | The cited text occurs in the submitted evidence. |
+| Numerical agreement | The verdict agrees with the clause's comparison and measured value. |
+| Commit match | The evidence refers to the approved delivery commit. |
+| Observation time | The evidence falls within the accepted freshness window. |
+| Review concerns | Unresolved interpretation problems hold the proposal for inspection. |
+
+The final amount is calculated from the deductions already recorded in the approved contract. A zero-value proposal is held because it cannot be submitted as a checkout order.
+
+</details>
+
+<details>
+<summary><strong>What happens when two actions reach the same milestone</strong></summary>
+
+Each update includes the revision the caller read. The database update succeeds only if that revision still matches. A stale action receives a conflict response and the user refreshes before acting.
+
+A successful write saves the milestone and its audit event in the same transaction. The event records the acting role, time, revision, state transition and names of changed fields. Payment creation and capture also claim their state before calling PayPal.
+
+</details>
+
+### Payment sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as CovenantX API
+    participant PayPal as PayPal Sandbox
+    Client->>API: Approve the settlement snapshot
+    API-->>Client: Store approval
+    Client->>API: Create order
+    API->>PayPal: Submit approved USD amount and request ID
+    PayPal-->>API: Order ID and buyer approval URL
+    API-->>Client: Open PayPal approval
+    Client->>PayPal: Sign in as Sandbox buyer and approve
+    Client->>API: Capture approved order
+    API->>PayPal: Capture with stored request ID
+    PayPal-->>API: Capture response
+    API->>API: Validate order, snapshot, amount and capture
+    Client->>API: Reconcile provider
+    API->>PayPal: Read order
+    PayPal-->>API: Current order and capture status
+    API-->>Client: Validated payment status
+```
+
+The configured Sandbox merchant receives the payment. The client and vendor tokens control workspace actions, while PayPal buyer approval takes place in the Sandbox checkout.
+
+<details>
+<summary><strong>Interrupted requests and reconciliation</strong></summary>
+
+A network error can leave the application uncertain about the provider's result. CovenantX records that uncertainty in the payment state and keeps the original payment identifiers.
+
+Reconciliation reads the existing order from PayPal and validates it against the approved snapshot. The recovery action can also inspect a candidate order after an interrupted operation. It checks the milestone reference, snapshot reference, currency and amount before adopting the provider result.
+
+Webhook processing sends the delivery headers and payload to PayPal for signature verification. It uses the registered webhook ID and records event IDs to handle repeated deliveries.
+
+</details>
+
 ## Evidence the app accepts
 
 | Evidence | Measurement used in the contract |
@@ -76,6 +183,28 @@ The contract determines which measurements are required. A milestone with a sing
 | Evidence passport | Export the decision record and replay its stored policy calculation. |
 | Activity log | Filter or export events by role and inspect recorded state transitions. |
 
+### Inspecting the result
+
+The interface keeps the active milestone selected as you move between workspaces. From Overview, each journey step opens the relevant workspace.
+
+- **Review findings** can be filtered by clause or by differences between the two stages. Expand a finding to read its source quotation.
+- **Settlement comparisons** let you change a hypothetical coverage value and inspect the effect on the amount.
+- **Activity history** can be searched and filtered by actor role, then exported as JSON.
+- **Evidence passports** collect the contract, evidence, decision and payment information for the selected milestone.
+
+<details>
+<summary><strong>Check an exported evidence passport</strong></summary>
+
+From the repository root, run:
+
+```bash
+python scripts/passport.py downloaded-passport.json --replay --report passport-report.md
+```
+
+The command checks the retained digest, replays the stored policy calculation and writes a readable report. Digest verification establishes consistency with the retained hash. Source authenticity depends on the evidence inspection recorded by the client.
+
+</details>
+
 ## Stack
 
 | Layer | Tools and responsibilities |
@@ -86,7 +215,25 @@ The contract determines which measurements are required. A milestone with a sing
 | Review | The Google GenAI SDK makes two sequential Gemini calls. Python checks citations and applies the contract rules with decimal arithmetic. |
 | Payments | PayPal Sandbox Orders API handles approval and capture. Stored request IDs support safe retries, and reconciliation checks the provider's order against the approved snapshot. |
 
-`apps/web/` contains the workspace. `apps/api/` contains the API, evidence parsers, review policy and PayPal adapter. `database/` contains migrations, `scripts/` contains local setup and passport tools, and `demo/` contains the sample contract and reports.
+<details>
+<summary><strong>Repository guide</strong></summary>
+
+| Path | Responsibility |
+| --- | --- |
+| `apps/web/app/` | Page composition, navigation and workspace actions |
+| `apps/web/components/` | Contract editor, report importer, review inspection and activity history |
+| `apps/api/covenantx/main.py` | API routes and milestone transitions |
+| `apps/api/covenantx/domain.py` | Input contracts, evidence checks and settlement arithmetic |
+| `apps/api/covenantx/ai.py` | Gemini requests and sequential review records |
+| `apps/api/covenantx/artifacts.py` | Report parsing and measurement receipts |
+| `apps/api/covenantx/paypal.py` | OAuth, orders, capture, signature verification and response validation |
+| `apps/api/covenantx/store.py` | Revision checks, persistence and audit writes |
+| `database/` | Database migrations |
+| `scripts/` | Configuration, startup and passport commands |
+| `demo/` | Sample contracts, reports and request collection |
+| `tests/` | Backend behavior and integration checks |
+
+</details>
 
 The workspace uses one client token and one vendor token per deployment. Checkout uses the Sandbox merchant tied to the configured PayPal app, and all milestone amounts are in USD.
 
