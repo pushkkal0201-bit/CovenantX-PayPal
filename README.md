@@ -1,12 +1,20 @@
 # CovenantX
 
-CovenantX helps a client review a software delivery and explain the amount approved for payment. It ties the agreed milestone terms, the vendor's reports, the review findings and the PayPal Sandbox order to the same record.
+CovenantX connects software acceptance criteria to a milestone payment. A client agrees on delivery rules, a vendor submits the reports, and Gemini reviews the evidence. The server applies the agreed deductions and prepares an amount for the client to approve through PayPal Sandbox.
 
-## Why use it?
+## The problem
 
-A software milestone may have a fixed price with deductions for missed acceptance criteria. The contract might be in a shared document, the measurements in a CI run and the payment in a separate dashboard. If the client pays less than the agreed price, the vendor has to work out which rule triggered the deduction and which report supports it.
+A failed acceptance check has a financial consequence only if the contract says what that consequence is. In practice, the terms, test reports and payment record often sit in different places. Working out a deduction means finding the right report, checking which delivery it belongs to and matching the result to the original agreement.
 
-CovenantX is for the point between delivery and payment, when both sides need to review what was delivered against the terms they agreed to. For example, a $5,000 milestone might require at least 85% statement coverage and specify a $500 deduction if that target is missed. If the submitted report shows 78% and all other clauses pass, the proposed amount is $4,500. The client can inspect the report, see the deduction beside the clause and approve that exact amount before checkout.
+CovenantX keeps those records together. Each finding points to a contract clause and a quotation from the submitted evidence. Each payment refers to the settlement snapshot the client approved.
+
+It's intended for software delivery milestones with measurable acceptance criteria, such as coverage targets, response-time limits, security findings or required documentation. The client and vendor agree on the rules before the delivery is reviewed.
+
+## A worked example
+
+Suppose a milestone is worth $5,000. Its contract requires at least 85% statement coverage, with a $500 deduction for falling below that threshold.
+
+The vendor submits a report showing 78%. The client checks the report's source and commit, then requests a review. If the remaining clauses pass and the evidence checks clear, CovenantX proposes $4,500. The client can open the coverage finding, inspect the supporting text and approve the amount before creating a PayPal Sandbox order.
 
 ## How a milestone moves through the app
 
@@ -23,11 +31,25 @@ flowchart TD
     Checkout --> Capture["Client captures and reconciles the order"]
 ```
 
-1. **Agree on the terms.** The client records the milestone amount, delivery commit and acceptance criteria. Each clause has a measurement, comparison, threshold and deduction. Approval locks the contract rules.
-2. **Submit and inspect the evidence.** The vendor uploads reports. The API derives measurements and records the file hashes. The client inspects the source and measurements and records an attestation. A file hash identifies the submitted content. The attestation records the client's source check.
-3. **Review each clause.** Gemini reads the submitted evidence and returns a finding and a quotation for each clause. A second Gemini call sees those findings and looks for problems. The API checks that each quote occurs in the evidence and that the verdict agrees with the measured value. Missing measurements, stale evidence, a mismatched commit or unresolved concerns can put the proposal on hold.
-4. **Approve the amount.** The server calculates the proposed amount in USD by subtracting the approved deductions for failed clauses. Gemini supplies the review findings. The contract rules determine the arithmetic, and the client approves the exact snapshot used for checkout.
-5. **Settle in PayPal Sandbox.** CovenantX creates an order for the approved amount. A Sandbox buyer approves it in PayPal. The client then requests capture and reconciliation. The API matches the provider response to the milestone, snapshot and amount before recording completion.
+The workflow has three approval points. The client first approves the contract, then attests the submitted evidence, and finally approves the settlement amount. These are separate actions because they answer different questions: what was agreed, what was delivered and what should be paid.
+
+### Contract and evidence
+
+Each contract clause defines a metric, comparison, threshold and deduction. Approval freezes those rules. Reports are associated with the delivery commit, and the API stores their content, hashes and parsed measurements.
+
+The client records how they inspected the source and measurements. Hashes let the application identify the submitted content. Source inspection depends on the client's attestation.
+
+### Gemini review
+
+The first Gemini call assesses the evidence against the clauses. The second receives that assessment and checks it for unsupported conclusions or contradictions. Both stages use the configured model, and their findings and quotations are available in the Verification workspace.
+
+The API checks that every approved clause has a finding, that each quotation occurs in the evidence and that the verdict agrees with the supplied measurement. It also checks the delivery commit, report age and required measurements. An unresolved concern or failed check puts the proposal on hold.
+
+### Settlement and checkout
+
+For each failed clause, the server subtracts the deduction written into the approved contract. Calculations use decimal arithmetic in USD. The client reviews the result and approves a snapshot tying the contract, evidence and decision to the payment.
+
+CovenantX uses that amount to create a PayPal Sandbox order. After the buyer approves it in PayPal, the client requests capture and reconciliation. The API checks the returned order, currency, amount and snapshot reference before recording completion. Stored request IDs and payment states control retries when a response is interrupted.
 
 ## Evidence the app accepts
 
@@ -38,9 +60,9 @@ flowchart TD
 | SARIF security report | Count of critical findings from the supported SARIF fields |
 | Plain text or Markdown | Presence of a nonempty document. The client reviews its completeness. |
 
-Use the reports that correspond to the approved clauses. A documentation-only contract, for example, only needs its delivery document.
+The contract determines which measurements are required. A milestone with a single documentation clause can be reviewed using its delivery document alone.
 
-## Reviewing a decision
+## Workspace
 
 | Workspace | What you can inspect or do |
 | --- | --- |
@@ -54,7 +76,7 @@ Use the reports that correspond to the approved clauses. A documentation-only co
 | Evidence passport | Export the decision record and replay its stored policy calculation. |
 | Activity log | Filter or export events by role and inspect recorded state transitions. |
 
-## Technical stack
+## Stack
 
 | Layer | Tools and responsibilities |
 | --- | --- |
@@ -90,10 +112,18 @@ npm run dev
 
 Open [CovenantX](http://localhost:3000) and unlock with the client or vendor token from your local `.env`. The [API health endpoint](http://127.0.0.1:8000/api/health) shows whether the provider settings loaded.
 
-## Try the workflow
+## Run the sample
 
-Start with the **built-in fixture**. Create and approve the prefilled contract as the client. Switch to the vendor, open **Advanced manual evidence / fixture** and submit the prefilled evidence. Switch back to the client, record an inspection note and attest the sample. In **Verification**, run **Run labeled fixture** and open **Settlement studio**. Expect a $500 deduction and a $4,500 proposal. Fixture decisions are labeled simulated and payment approval is blocked.
+The repository includes a $5,000 sample contract and fictional delivery evidence.
 
-For **Gemini and PayPal Sandbox**, use a fresh milestone and genuine evidence from the delivery commit. The [local runbook](docs/LOCAL_RUNBOOK.md#test-gemini-and-paypal-sandbox) walks through a documentation-only milestone using this repository's README, from the evidence upload to a reconciled Sandbox capture.
+1. Unlock as the client, create the prefilled draft and approve its contract.
+2. Switch to the vendor. Open **Advanced manual evidence / fixture** and submit the prefilled evidence.
+3. Switch back to the client, inspect the sample and record an attestation.
+4. In **Verification**, click **Run labeled fixture**.
+5. Open **Settlement studio**. The sample produces a $500 coverage deduction and a $4,500 proposal.
+
+Fixture results are labeled simulated and cannot authorize payment. This gives you a repeatable way to inspect the clauses, calculations and evidence passport.
+
+To exercise Gemini and PayPal Sandbox, use a fresh milestone with actual evidence from its delivery commit. The [local runbook](docs/LOCAL_RUNBOOK.md#test-gemini-and-paypal-sandbox) covers a documentation milestone using this repository's README, including buyer approval, capture and reconciliation.
 
 [Architecture](docs/ARCHITECTURE.md) · [PayPal integration](docs/integrations/PAYPAL_INTEGRATION.md) · [Threat model](docs/security/THREAT_MODEL.md) · [MIT License](LICENSE)
