@@ -21,6 +21,9 @@ import {
   Download,
   Plus,
   ChevronRight,
+  CheckCircle2,
+  Circle,
+  ArrowRight,
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -258,7 +261,7 @@ function App() {
           </span>
           Covenant<span className="emerald">X</span>
         </a>
-        <div className="small muted brand-sub">POWERED BY PROOFPAY</div>
+        <div className="small muted brand-sub">CONTRACT TO PAYPAL</div>
         <div className="workspace">
           <span className="avatar">CX</span>
           <div>
@@ -434,37 +437,42 @@ function App() {
                       <h2>From obligation to settlement</h2>
                       <span className="pill">Evidence first</span>
                     </div>
-                    <div className="steps">
+                    <p>Follow the live milestone state. Select a step to open its workspace.</p>
+                    <div className="journey">
                       {[
-                        "Contract approved",
-                        "Evidence attested",
-                        "Review completed",
-                        "Settlement approved",
-                        "Capture confirmed",
-                      ].map((s, i) => (
-                        <div key={s}>
-                          <span>{String(i + 1).padStart(2, "0")}</span>
-                          <h3>{s}</h3>
-                          <p>
-                            {
-                              [
-                                "Freeze the agreed financial terms.",
-                                "Inspect the artifact and its measurements.",
-                                "Ground each finding in a source quote.",
-                                "Authorize the exact decision snapshot.",
-                                "Reconcile the PayPal response.",
-                              ][i]
-                            }
-                          </p>
-                        </div>
+                        { title: "Agree terms", detail: "Approve the milestone rules", target: "Contract & evidence", done: !!d && d.state !== "DRAFT" },
+                        { title: "Inspect delivery", detail: "Vendor submits; client attests", target: "Contract & evidence", done: !!d?.evidence_attestation },
+                        { title: "Review evidence", detail: "Run Gemini and inspect citations", target: "Verification", done: !!d?.verification },
+                        { title: "Approve amount", detail: "Authorize the exact snapshot", target: "Settlement studio", done: ["APPROVED", "CREATING", "CREATE_UNKNOWN", "ORDER_CREATED", "CAPTURING", "CAPTURE_UNKNOWN", "COMPLETED", "PROVIDER_REVIEW"].includes(d?.state || "") },
+                        { title: "Settle in Sandbox", detail: "Buyer approval, capture, reconcile", target: "PayPal operations", done: d?.state === "COMPLETED" },
+                      ].map((step, i) => (
+                        <button className="journey-step" key={step.title} onClick={() => setTab(step.target)} aria-label={`${step.done ? "Completed" : "Open"}: ${step.title}`}>
+                          <span className={step.done ? "journey-icon done" : "journey-icon"}>
+                            {step.done ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                          </span>
+                          <span className="journey-copy"><b>{String(i + 1).padStart(2, "0")} · {step.title}</b><small>{step.detail}</small></span>
+                          <ArrowRight size={15} />
+                        </button>
                       ))}
                     </div>
-                    <button
-                      className="primary"
-                      onClick={() => setTab("Contract & evidence")}
-                    >
-                      Open contract workspace <ArrowUpRight size={16} />
-                    </button>
+                  </section>
+                  <section className="panel impact-panel">
+                    <div className="panel-title">
+                      <div><h2>How evidence reaches PayPal</h2><p>AI reviews evidence. Approved contract rules calculate the amount; the client authorizes the resulting snapshot.</p></div>
+                      <span className="pill">AUDITABLE</span>
+                    </div>
+                    <div className="impact-flow">
+                      <div><small>Contract amount</small><b>${d?.contract.amount || "—"}</b></div>
+                      <span aria-hidden="true">−</span>
+                      <div><small>Rule deductions</small><b>${d?.proposal ? (Number(d.proposal.base) - Number(d.proposal.amount)).toFixed(2) : "—"}</b></div>
+                      <span aria-hidden="true">=</span>
+                      <div className="impact-result"><small>Proposed PayPal amount</small><b>${d?.proposal?.amount || "—"}</b></div>
+                    </div>
+                    <div className="impact-foot">
+                      <span>{d?.proposal?.rows.length ?? 0} clause findings</span>
+                      <span>{d?.proposal?.holds.length ? `${d.proposal.holds.length} hold(s) block approval` : d?.proposal ? "No review holds" : "Run evidence review to calculate"}</span>
+                      <button className="quiet" onClick={() => setTab("Settlement studio")}>Inspect calculation <ArrowUpRight size={14} /></button>
+                    </div>
                   </section>
                   <div className="two">
                     <section className="panel">

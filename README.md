@@ -12,11 +12,11 @@ Software agencies often keep delivery requirements, CI evidence, acceptance deci
 
 ## Phase 2 update
 
-Report uploads now derive measurements server-side, draft contracts have a form editor, interrupted payments have a GET-only recovery action, and passports support historical policy replay. See [Phase 2 details](docs/engineering/PHASE_2.md) and [executed checks](docs/evaluations/PHASE_2_TEST_REPORT.md).
+Report uploads now derive measurements server-side, draft contracts have a form editor, interrupted payments have a GET-only recovery action, and passports support historical policy replay. See [Phase 2 details](docs/engineering/PHASE_2.md) and [executed checks](docs/evaluations/PHASE_2_TEST_REPORT.md). The latest dashboard increment adds a guided milestone journey and an at-a-glance amount impact panel; see [Phase 4](docs/engineering/PHASE_4.md).
 
 ## What runs today
 
-- Next.js 15 / TypeScript interface with eight workspaces, role-specific actions, explicit errors and 15-second polling.
+- Next.js 15 / TypeScript interface with eight workspaces, role-specific actions, explicit errors and 15-second polling. The overview includes a live, clickable journey and a transaction impact preview that traces approved rule deductions to the proposed PayPal amount.
 - FastAPI API, Pydantic validation and SQLAlchemy persistence. Local SQLite was tested; PostgreSQL configuration and Alembic migration are supplied.
 - Immutable contract rules after approval, revision-bound writes and append-only application audit events.
 - Contract forms and revision-bound draft editing; advanced JSON remains available. Approved contracts cannot be edited.
